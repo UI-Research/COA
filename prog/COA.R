@@ -67,9 +67,26 @@ list.df <- do.call("rbind", lapply(list, as.data.frame)) %>%
   rename(TO_PERM = TOTAL_PERM_1) %>%
   rename(TO_TEMP = TOTAL_TEMP_1) 
 list.df$ZIPCODE<-as.character(list.df$ZIPCODE)
+year_2018$ZIPCODE<-as.character(year_2018$ZIPCODE)
+year_2019$ZIPCODE<-as.character(year_2019$ZIPCODE)
+year_2020$ZIPCODE<-as.character(year_2020$ZIPCODE)
+year_2021$ZIPCODE<-as.character(year_2021$ZIPCODE)
 write.csv(list.df, file.path(path, "COA_monthbyzip.csv"))
 
-#Make annual counts for each year (for destined, not originated, COAs)
+#Internal Validity Checks for monthly/zip data
+zeroes_monthly <- colSums(list.df==0)/nrow(list.df)*100
+summary(list.df)
+
+#Make remainder field to see the difference between total_from and rest of variables
+list.df$from_check <- list.df$TOTAL_FROM_ZIP - (list.df$FROM_BUSINESS+ list.df$FROM_FAMILY+ list.df$FROM_INDIVIDUAL)
+list.df$to_check <- list.df$TOTAL_TO_ZIP - (list.df$TO_BUSINESS+ list.df$TO_FAMILY+ list.df$TO_INDIVIDUAL)
+
+list.df$from_perm_check <- list.df$TOTAL_FROM_ZIP - (list.df$FROM_PERM+ list.df$FROM_TEMP)
+list.df$to_perm_check <- list.df$TOTAL_TO_ZIP - (list.df$TO_PERM+ list.df$TO_TEMP)
+
+remainders_monthly <- colSums(list.df==0)/nrow(list.df)*100
+
+###Make annual counts for each year (for destined, not originated, COAs)
 yearlycount_2018 <- year_2018 %>% 
   group_by(ZIPCODE) %>%
   summarise(TOTAL_FROM_ZIP = sum(TOTAL_FROM_ZIP),
@@ -162,6 +179,7 @@ COA_yearly <- list1.df %>%
             NET_PERM = sum(NET_PERM),
             NET_TEMP = sum(NET_TEMP)) 
 write.csv(COA_yearly, file.path(path, "COA_yearlybyzip.csv"))
+zeroes <- colSums(COA_yearly==0)/nrow(COA_yearly)*100
 
 #Report quarterly counts by zip code
 
@@ -319,10 +337,19 @@ crosswalk <- read_csv("../zip_county_crosswalk.csv")
 #Rename zipcode to match the original data 
  crosswalk <- crosswalk %>% 
    rename(ZIPCODE = ZIP) %>%
-   mutate(ZIPCODE = as.numeric(ZIPCODE))
+   mutate(ZIPCODE = as.double(ZIPCODE))
+ 
+ year_2018 <- year_2018 %>%
+   mutate(ZIPCODE = as.double(ZIPCODE))
  
 year_2019 <- year_2019 %>%
-  mutate(ZIPCODE = as.numeric(ZIPCODE))
+  mutate(ZIPCODE = as.double(ZIPCODE))
+
+year_2020 <- year_2020 %>%
+  mutate(ZIPCODE = as.double(ZIPCODE))
+
+year_2021 <- year_2021 %>%
+  mutate(ZIPCODE = as.double(ZIPCODE))
  
 #Left join the original year data to the crosswalk
 zcta_join2018 <- year_2018 %>%
@@ -413,7 +440,8 @@ county_yearly <- list3.df %>%
          NET_TEMP = sum(NET_TEMP))
 
 county_yearly <- county_yearly %>%
-  select(-ZIPCODE) 
+  select(-ZIPCODE) %>%
+  distinct(COUNTY_NAME,.keep_all= TRUE)
 
 write.csv(county_yearly, file.path(path, "COA_yearbycounty.csv"))
 
@@ -444,15 +472,323 @@ quarter_county <- quarter %>%
             NET_FAMILY = sum(NET_FAMILY),
             NET_INDIVIDUAL = sum(NET_INDIVIDUAL),
             NET_PERM = sum(NET_PERM),
-            NET_TEMP = sum(NET_TEMP)) 
+            NET_TEMP = sum(NET_TEMP)) %>%
+  distinct(COUNTY_NAME,Quarter,.keep_all= TRUE) 
 write.csv(quarter_county, file.path(path, "COA_quarterlybycounty.csv"))
 
 ######################################################################################
-#Create percentages:
+#Get denominator of addresses by zipcode and county, create rates of mobility - Create percentages:
+library(foreign)
 
-#Get denominator of addresses by zipcode and county, create rates of mobility
-#tidy census total households by zcta
+#Read in HUD vacancy data (in quarters) 
+#Key variable of interest: AMS_RES, total count of residential addresses; AMS_BUS, total count of businesses 
+#Note: Excluded q3 in 2021 because HUD data is incomplete
+vacancy_q1_2018 <- read.dbf("../usps_vac_032018.dbf") %>%
+ select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q1_2018$Year <- "2018"
+vacancy_q1_2018$Quarter <- "1"
 
+vacancy_q2_2018 <- read.dbf("../usps_vac_062018.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q2_2018$Year <- "2018"
+vacancy_q2_2018$Quarter <- "2"
+
+vacancy_q3_2018 <- read.dbf("../usps_vac_092018.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q3_2018$Year <- "2018"
+vacancy_q3_2018$Quarter <- "3"
+
+vacancy_q4_2018 <- read.dbf("../usps_vac_122018.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q4_2018$Year <- "2018"
+vacancy_q4_2018$Quarter <- "4"
+  
+vacancy_q1_2019 <- read.dbf("../usps_vac_032019.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q1_2019$Year <- "2019"
+vacancy_q1_2019$Quarter <- "1"
+
+vacancy_q2_2019 <- read.dbf("../usps_vac_062019.dbf")%>%
+  select(geoid,ams_res, ams_bus,ams_oth) 
+vacancy_q2_2019$Year <- "2019"
+vacancy_q2_2019$Quarter <- "2"
+
+vacancy_q3_2019 <- read.dbf("../usps_vac_092019.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q3_2019$Year <- "2019"
+vacancy_q3_2019$Quarter <- "3"
+
+vacancy_q4_2019 <- read.dbf("../usps_vac_122019.dbf")%>%
+  select(geoid,ams_res, ams_bus,ams_oth) 
+vacancy_q4_2019$Year <- "2019"
+vacancy_q4_2019$Quarter <- "4"
+
+vacancy_q1_2020 <- read.dbf("../usps_vac_032020.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q1_2020$Year <- "2020"
+vacancy_q1_2020$Quarter <- "1"
+
+vacancy_q2_2020 <- read.dbf("../usps_vac_062020.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth) 
+vacancy_q2_2020$Year <- "2020"
+vacancy_q2_2020$Quarter <- "2"
+
+vacancy_q3_2020 <- read.dbf("../usps_vac_092020.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q3_2020$Year <- "2020"
+vacancy_q3_2020$Quarter <- "3"
+
+vacancy_q4_2020 <- read.dbf("../usps_vac_122020.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q4_2020$Year <- "2020"
+vacancy_q4_2020$Quarter <- "4"
+
+vacancy_q1_2021 <- read.dbf("../usps_vac_032021.dbf") %>%
+  select(geoid,ams_res, ams_bus,ams_oth)
+vacancy_q1_2021$Year <- "2021"
+vacancy_q1_2021$Quarter <- "1"
+
+vacancy_q2_2021 <- read.dbf("../usps_vac_062021.dbf")%>%
+  select(geoid,ams_res, ams_bus,ams_oth) 
+vacancy_q2_2021$Year <- "2021"
+vacancy_q2_2021$Quarter <- "2"
+
+#Roll Up the quarterly data
+list4 <- list(vacancy_q1_2018,vacancy_q2_2018,vacancy_q3_2018,vacancy_q4_2018, vacancy_q1_2019,vacancy_q2_2019,vacancy_q3_2019,vacancy_q4_2019,vacancy_q1_2020,vacancy_q2_2020,vacancy_q3_2020,vacancy_q4_2020,vacancy_q1_2021,vacancy_q2_2021)
+do.call("rbind", list4)
+total_addresses_quarters <- do.call("rbind", lapply(list4, as.data.frame))
+
+#Compile yearly count
+total_addresses_yearly <- total_addresses_quarters %>% 
+  group_by(Year,geoid) %>%
+  mutate(ams_res = sum(ams_res),
+         ams_bus = sum(ams_bus),
+         ams_oth = sum(ams_oth)) %>%
+  select(-Quarter) %>%
+  relocate(Year, .before = ams_res)
+
+#Crosswalk of zipcode and census tract data
+#Read in crosswalk file
+tract_crosswalk <- read_csv("../tract_zip_crosswalk.csv") 
+
+#Rename zipcode to match the original data 
+tract_crosswalk <- tract_crosswalk %>% 
+  rename(geoid = TRACT) %>%
+  mutate(geoid = as.factor(geoid))%>%
+  select(-RES_RATIO)%>%
+  select(-BUS_RATIO)%>%
+  select(-OTH_RATIO)%>%
+  select(-TOT_RATIO)
+
+#Left join the original year data to the census tract + zipcode crosswalk
+tract_join_quarters <- total_addresses_quarters %>%
+  left_join(tract_crosswalk) 
+
+tract_join_years <- total_addresses_yearly %>%
+  left_join(tract_crosswalk) 
+
+#Groupby and sum by zipcode - both quarterly and yearly
+tract_join_quarters <- tract_join_quarters %>%
+  group_by(Year,Quarter, ZIP) %>%
+  mutate(ams_res = sum(ams_res),
+         ams_bus = sum(ams_bus),
+         ams_oth = sum(ams_oth)) %>%
+  select(-geoid) %>%
+  rename(ZIPCODE = ZIP) %>% 
+  relocate(ZIPCODE, .before = ams_res) %>% 
+  relocate(Year, .before = ams_res)%>% 
+  relocate(Quarter, .before = ams_res)
+
+tract_join_years <- tract_join_years %>%
+  group_by(Year, ZIP) %>%
+  mutate(ams_res = sum(ams_res),
+         ams_bus = sum(ams_bus),
+         ams_oth = sum(ams_oth)) %>%
+  select(-geoid) %>%
+  rename(ZIPCODE = ZIP) %>% 
+  relocate(ZIPCODE, .before = ams_res) %>% 
+  relocate(Year, .before = ams_res)
+
+#Join these two new data frames to the original quarter and year data at the zip level
+COA_quarterly <- COA_quarterly %>%
+  mutate(Quarter = as.character(Quarter))
+
+COA_quarterly_denominators <- COA_quarterly %>%
+  left_join(tract_join_quarters) %>%
+  distinct(ZIPCODE,Year,Quarter,.keep_all= TRUE) 
+
+COA_yearly_denominators <- COA_yearly %>%
+  left_join(tract_join_years) %>%
+  distinct(ZIPCODE,Year,.keep_all= TRUE) 
+
+#Create new "residential" count for COA data
+COA_quarterly_denominators$NET_RES <- COA_quarterly_denominators$NET_FAMILY + COA_quarterly_denominators$NET_INDIVIDUAL 
+COA_quarterly_denominators <- COA_quarterly_denominators %>%
+  relocate(NET_RES, .before = NET_PERM)
+
+COA_yearly_denominators$NET_RES <- COA_yearly_denominators$NET_FAMILY + COA_yearly_denominators$NET_INDIVIDUAL 
+COA_yearly_denominators <- COA_yearly_denominators %>%
+  relocate(NET_RES, .before = NET_PERM)
+
+#Create new total denominator adding all avaialable addresses
+COA_quarterly_denominators$ams_total <- COA_quarterly_denominators$ams_res +COA_quarterly_denominators$ams_bus + COA_quarterly_denominators$ams_oth
+COA_quarterly_denominators <- COA_quarterly_denominators %>%
+  relocate(ams_total, .before = USPS_ZIP_PREF_CITY)
+
+COA_yearly_denominators$ams_total <- COA_yearly_denominators$ams_res +COA_yearly_denominators$ams_bus + COA_yearly_denominators$ams_oth
+COA_yearly_denominators <- COA_yearly_denominators %>%
+  relocate(ams_total, .before = USPS_ZIP_PREF_CITY)
+
+#Create residential, business, and total percentages at the zip level
+COA_quarterly_denominators$RES_percent <- COA_quarterly_denominators$NET_RES / COA_quarterly_denominators$ams_res
+COA_quarterly_denominators$BUS_percent <- COA_quarterly_denominators$NET_BUSINESS / COA_quarterly_denominators$ams_bus
+COA_quarterly_denominators$TOT_percent <- COA_quarterly_denominators$NET_PERM / COA_quarterly_denominators$ams_total
+
+COA_yearly_denominators$RES_percent <- COA_yearly_denominators$NET_RES / COA_yearly_denominators$ams_res
+COA_yearly_denominators$BUS_percent <- COA_yearly_denominators$NET_BUSINESS / COA_yearly_denominators$ams_bus
+COA_yearly_denominators$TOT_percent <- COA_yearly_denominators$NET_PERM / COA_yearly_denominators$ams_total
+
+write.csv(COA_quarterly_denominators, file.path(path, "Percents_quarterbyzip.csv"))
+write.csv(COA_yearly_denominators, file.path(path, "Percents_yearbyzip.csv"))
+
+##########################################################################
+#County level percents
+#Group total address data at county level
+county_quarterly_denominators <- COA_quarterly_denominators %>%
+  mutate(ZIPCODE = as.double(ZIPCODE)) %>%
+  select(-RES_percent) %>%
+  select(-BUS_percent) %>%
+  select(-TOT_percent) 
+
+#Add the zip county crosswalk 
+county_quarterly_denominators <- county_quarterly_denominators%>%
+  left_join(crosswalk, by="ZIPCODE") 
+  
+county_quarterly_denominators <- county_quarterly_denominators %>%
+  group_by(Year,Quarter, COUNTYNM) %>%
+  mutate(TOTAL_FROM_COUNTY = sum(TOTAL_FROM_ZIP),
+         FROM_BUSINESS = sum(FROM_BUSINESS),
+         FROM_FAMILY = sum(FROM_FAMILY),
+         FROM_INDIVIDUAL = sum(FROM_INDIVIDUAL),
+         FROM_PERM = sum(FROM_PERM),
+         FROM_TEMP = sum(FROM_TEMP),
+         TOTAL_TO_COUNTY = sum(TOTAL_TO_ZIP),
+         TO_BUSINESS = sum(TO_BUSINESS),
+         TO_FAMILY = sum(TO_FAMILY),
+         TO_INDIVIDUAL = sum(TO_INDIVIDUAL),
+         TO_PERM = sum(TO_PERM),
+         TO_TEMP = sum(TO_TEMP),
+         NET_COUNTY = sum(NET_ZIP),
+         NET_BUSINESS = sum(NET_BUSINESS),
+         NET_FAMILY = sum(NET_FAMILY),
+         NET_INDIVIDUAL = sum(NET_INDIVIDUAL),
+         NET_RES = sum(NET_RES),
+         NET_PERM = sum(NET_PERM),
+         ams_res = sum(ams_res),
+         ams_bus = sum(ams_bus),
+         ams_oth = sum(ams_oth),
+         ams_total = sum(ams_total)) %>%
+         distinct(COUNTYNM,.keep_all= TRUE) %>%
+         select(-ZIPCODE) %>%
+         select(-TOTAL_FROM_ZIP) %>%
+         select(-TOTAL_TO_ZIP) %>%
+         select(-NET_ZIP) %>%
+         relocate(TOTAL_FROM_COUNTY, .before = FROM_BUSINESS) %>%
+         relocate(TOTAL_TO_COUNTY, .before = TO_BUSINESS) %>%
+         relocate(NET_COUNTY, .before = NET_BUSINESS) 
+
+county_quarterly_denominators$RES_percent <- county_quarterly_denominators$NET_RES / county_quarterly_denominators$ams_res
+county_quarterly_denominators$BUS_percent <- county_quarterly_denominators$NET_BUSINESS / county_quarterly_denominators$ams_bus
+county_quarterly_denominators$TOT_percent <- county_quarterly_denominators$NET_PERM / county_quarterly_denominators$ams_total
+
+###Year county percentages
+#Group total address data at county level
+county_year_denominators <- COA_yearly_denominators %>%
+  mutate(ZIPCODE = as.double(ZIPCODE)) %>%
+  select(-RES_percent) %>%
+  select(-BUS_percent) %>%
+  select(-TOT_percent) 
+
+#Add the zip county crosswalk 
+county_year_denominators <- county_year_denominators%>%
+  left_join(crosswalk, by="ZIPCODE") 
+
+county_year_denominators <- county_year_denominators %>%
+  group_by(Year, COUNTYNM) %>%
+  mutate(TOTAL_FROM_COUNTY = sum(TOTAL_FROM_ZIP),
+         FROM_BUSINESS = sum(FROM_BUSINESS),
+         FROM_FAMILY = sum(FROM_FAMILY),
+         FROM_INDIVIDUAL = sum(FROM_INDIVIDUAL),
+         FROM_PERM = sum(FROM_PERM),
+         FROM_TEMP = sum(FROM_TEMP),
+         TOTAL_TO_COUNTY = sum(TOTAL_TO_ZIP),
+         TO_BUSINESS = sum(TO_BUSINESS),
+         TO_FAMILY = sum(TO_FAMILY),
+         TO_INDIVIDUAL = sum(TO_INDIVIDUAL),
+         TO_PERM = sum(TO_PERM),
+         TO_TEMP = sum(TO_TEMP),
+         NET_COUNTY = sum(NET_ZIP),
+         NET_BUSINESS = sum(NET_BUSINESS),
+         NET_FAMILY = sum(NET_FAMILY),
+         NET_INDIVIDUAL = sum(NET_INDIVIDUAL),
+         NET_RES = sum(NET_RES),
+         NET_PERM = sum(NET_PERM),
+         ams_res = sum(ams_res),
+         ams_bus = sum(ams_bus),
+         ams_oth = sum(ams_oth),
+         ams_total = sum(ams_total)) %>%
+  distinct(COUNTYNM,.keep_all= TRUE) %>%
+  select(-ZIPCODE) %>%
+  select(-TOTAL_FROM_ZIP) %>%
+  select(-TOTAL_TO_ZIP) %>%
+  select(-NET_ZIP) %>%
+  relocate(TOTAL_FROM_COUNTY, .before = FROM_BUSINESS) %>%
+  relocate(TOTAL_TO_COUNTY, .before = TO_BUSINESS) %>%
+  relocate(NET_COUNTY, .before = NET_BUSINESS) 
+
+county_year_denominators$RES_percent <- county_year_denominators$NET_RES / county_year_denominators$ams_res
+county_year_denominators$BUS_percent <- county_year_denominators$NET_BUSINESS / county_year_denominators$ams_bus
+county_year_denominators$TOT_percent <- county_year_denominators$NET_PERM / county_year_denominators$ams_total
+
+write.csv(county_quarterly_denominators, file.path(path, "Percents_quarterbycounty.csv"))
+write.csv(county_year_denominators, file.path(path, "Percents_yearbycounty.csv"))
+
+################################################################################
+#Preliminary findings 
+
+#Which counties had the highest net change between 2019 and 2020? At county level
+library(rmarkdown)
+library(knitr)
+
+net2020 <- county_yearly %>%
+  filter(Year == 2019 | Year == 2020)%>%
+  group_by(COUNTY_NAME) %>%
+  arrange(Year, .by_group = TRUE) %>%
+  mutate(net_2020 =(NET_COUNTY) - lag((NET_COUNTY), default = first(NET_COUNTY)))%>%
+  filter(Year == 2020)%>%
+  arrange(net_2020)
+
+#Top in this instance means cities with highest out migration (people leaving)
+top2020 <- net2020  %>%
+  select(COUNTY_NAME, CITY.x, STATE.x, net_2020)%>%
+  arrange(net_2020)
+#Couldn't figure out what was wrong with my slice function - so I could create table directly from R
+
+#Graph monthly residential (individual +family moves) from DC county 
+dc_moves <- county_monthly %>%
+  filter(COUNTY_NAME == "District of Columbia")%>%
+  mutate(NET_RESIDENTIAL = NET_FAMILY + NET_INDIVIDUAL)%>%
+  select(YYYYMM, COUNTY_NAME, CITY.x, STATE.x, NET_PERM, NET_TEMP, NET_COUNTY, NET_RESIDENTIAL)
+#Tables made in excel (for now) 
+
+#Results with vacancy data for DC county
+dc_vacancy <- county_year_denominators%>%
+  filter(COUNTYNM == "District of Columbia")
+  
+dc_vacancy_quarters <- county_quarterly_denominators%>%
+  filter(COUNTYNM == "District of Columbia")
+
+################################################################################
 #Validate with other data
 
 
