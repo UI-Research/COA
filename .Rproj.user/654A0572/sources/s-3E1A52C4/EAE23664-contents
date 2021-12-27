@@ -15,7 +15,7 @@ setwd("~/GitHub/COA/prog")
 # Choose where to save outputs. Default is output folder in the github repo folder. 
 path <- c("../output/")
 
-#Manually adjusted column names to get rid of spaces
+#Manually adjusted column names to get rid of spaces. Named the "to" variables with a "_1" name
 
 # Read in city list and coordinates
 year_2018 <- read.csv("../y2018.csv", check.names = FALSE) 
@@ -126,5 +126,8 @@ write.csv(open_data_file, file.path(path, "COA_opendatafile.csv"))
 library(tidycensus)
 library(tidyverse)
 
-## Use NNIP API key
+# Use Census API key
 census_api_key("e0e50dbbc586496e193c885ba478cae24f3150b3", overwrite = FALSE, install = FALSE)
+
+#
+

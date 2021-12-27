@@ -1,0 +1,32 @@
+{
+    "id": "E132264A",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1640642691146.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "expression": "open_data_file",
+        "caption": "open_data_file",
+        "totalObservations": 31756,
+        "displayedObservations": 31756,
+        "variables": 191,
+        "cacheKey": "EBFFBC1A",
+        "object": "open_data_file",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=open_data_file&cache_key=EBFFBC1A&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1910778210112,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1640642691146,
+    "read_only": false,
+    "read_only_alternatives": []
+}

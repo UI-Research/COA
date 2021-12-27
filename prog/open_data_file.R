@@ -15,13 +15,13 @@ setwd("~/GitHub/COA/prog")
 # Choose where to save outputs. Default is output folder in the github repo folder. 
 path <- c("../output/")
 
-#Manually adjusted column names to get rid of spaces
+#Manually adjusted column names to get rid of spaces. Named the "to" variables with a "_1" name
 
 # Read in city list and coordinates
-year_2018 <- read_csv("../y2018.csv") 
-year_2019 <- read_csv("../y2019.csv")
-year_2020 <- read_csv("../y2020.csv")
-year_2021 <- read_csv("../y2021.csv")
+year_2018 <- read.csv("../y2018.csv", check.names = FALSE) 
+year_2019 <- read.csv("../y2019.csv", check.names = FALSE)
+year_2020 <- read.csv("../y2020.csv", check.names = FALSE)
+year_2021 <- read.csv("../y2021.csv", check.names = FALSE)
 
 #Create net variables
 year_2018$NET_ZIP <-year_2018$TOTAL_TO_ZIP - year_2018$TOTAL_FROM_ZIP 
@@ -121,5 +121,13 @@ open_data_file <- NET_ZIP %>%
 write.csv(open_data_file, file.path(path, "COA_opendatafile.csv"))
 
 ####
-#Validating with census data
+#Validating USPS COA counts with census data
+
+library(tidycensus)
+library(tidyverse)
+
+# Use Census API key
+census_api_key("e0e50dbbc586496e193c885ba478cae24f3150b3", overwrite = FALSE, install = FALSE)
+
+#
 
