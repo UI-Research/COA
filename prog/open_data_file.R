@@ -120,5 +120,6 @@ open_data_file <- NET_ZIP %>%
   rename(STATE = STATE.x)
 write.csv(open_data_file, file.path(path, "COA_opendatafile.csv"))
 
-
+####
+#Validating with census data
 
