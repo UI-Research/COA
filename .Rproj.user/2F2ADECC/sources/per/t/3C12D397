@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1640115848129.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1272959555",
+    "id" : "3C12D397",
+    "lastKnownWriteTime" : 1640187209,
+    "last_content_update" : 1640187209111,
+    "path" : "~/GitHub/COA/prog/quarters_open_data_file.R",
+    "project_path" : "prog/quarters_open_data_file.R",
+    "properties" : {
+        "cursorPosition" : "357,0",
+        "scrollLine" : "341",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,5 +1,5 @@
-# USPS Change of Address 2018-2021 Merging and Analysis
-# Created by: Sonia Torres Rodr?guez
+# USPS Change of Address 2018-2021 Open Data File
+# Created by: Sonia Torres Rodriguez
 # Create date: December 17, 2021
 # 
 #--------------------------------------------------------------------------------------------------
@@ -76,38 +76,49 @@ list <- list(year_2018,year_2019,year_2020,year_2021)
 do.call("rbind", list)
 COA_monthly_zip <- do.call("rbind", lapply(list, as.data.frame)) 
 
+COA_monthly_zip %>%
+  count(YYYYMM)
+
 #Adjust type to be able to transpose
 COA_monthly_zip <- COA_monthly_zip %>%
   mutate(YYYYMM = as.numeric(YYYYMM),
          NET_ZIP = as.numeric(NET_ZIP),
          NET_PERM = as.numeric(NET_PERM),
          NET_TEMP = as.numeric(NET_TEMP),
-         NET_RESIDENTIAL = as.double(NET_RESIDENTIAL))%>%
+         NET_RESIDENTIAL = as.numeric(NET_RESIDENTIAL), 
+         #This is the zipcode padding to make standardize zipcode format so pivot_wider works
+         ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0"))%>% 
   relocate(ZIPCODE, .before = YYYYMM)
 
 write.csv(COA_monthly_zip, file.path(path, "check.csv"))
 
 #Transposing for each variable and merging again
 NET_ZIP <- COA_monthly_zip %>%
-  select(ZIPCODE, YYYYMM, NET_ZIP) %>%
+  select(ZIPCODE, CITY, STATE, YYYYMM, NET_ZIP) %>% 
   pivot_wider(names_from = YYYYMM, values_from = NET_ZIP, names_prefix = "NET_ZIP_")
 
 NET_PERM <- COA_monthly_zip %>%
-  select(ZIPCODE, YYYYMM, NET_PERM) %>%
+  select(ZIPCODE, CITY, STATE, YYYYMM, NET_PERM) %>%
   pivot_wider(names_from = YYYYMM, values_from = NET_PERM, names_prefix = "NET_PERM_") 
   
 NET_TEMP <- COA_monthly_zip %>%
-  select(ZIPCODE, YYYYMM, NET_TEMP) %>%
+  select(ZIPCODE,CITY, STATE, YYYYMM, NET_TEMP) %>%
   pivot_wider(names_from = YYYYMM, values_from = NET_TEMP, names_prefix = "NET_TEMP_") 
 
 NET_RES <- COA_monthly_zip%>%
-  select(ZIPCODE, YYYYMM, NET_RESIDENTIAL) %>%
+  select(ZIPCODE,CITY, STATE,YYYYMM, NET_RESIDENTIAL) %>%
   pivot_wider(names_from = YYYYMM, values_from = NET_RESIDENTIAL, names_prefix = "NET_RES_")
 
-merge1 <- merge(NET_ZIP,NET_PERM, by="ZIPCODE")
-merge2 <- merge(merge1, NET_TEMP, by = "ZIPCODE")
-public_data_file <- merge(merge2, NET_RES, by = "ZIPCODE")
-write.csv(public_data_file, file.path(path, "COA_publicdatafile.csv"))
+#Merging the short data sets to create one data file
+open_data_file <- NET_ZIP %>% 
+  full_join(NET_PERM, by = "ZIPCODE")%>% 
+  full_join(NET_TEMP, by = "ZIPCODE")%>% 
+  full_join(NET_RES, by = "ZIPCODE") %>% 
+  distinct(ZIPCODE,.keep_all= TRUE) %>% 
+  select(-CITY.y, -STATE.y, -CITY.x.x, -STATE.x.x,-CITY.y.y, -STATE.y.y) %>% 
+  rename(CITY = CITY.x) %>%
+  rename(STATE = STATE.x)
+write.csv(open_data_file, file.path(path, "COA_opendatafile.csv"))
 
-#Add city and state back in (can some columns be left with pivot wider?) Could merge add a merge with city and state too
-#Explore the NAs- something is going amiss with pivot_wider
+
+
