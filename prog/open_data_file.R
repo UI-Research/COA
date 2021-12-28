@@ -8,6 +8,7 @@
 library(tidyverse)
 library(lubridate)
 library(dplyr)
+library(stringr)
 
 #Set working directory
 setwd("~/GitHub/COA/prog")
@@ -125,9 +126,63 @@ write.csv(open_data_file, file.path(path, "COA_opendatafile.csv"))
 
 library(tidycensus)
 library(tidyverse)
+library(tigris)
+options(tigris_use_cache = TRUE)
 
 # Use Census API key
 census_api_key("e0e50dbbc586496e193c885ba478cae24f3150b3", overwrite = FALSE, install = FALSE)
 
-#
+#Reference: https://walker-data.com/tidycensus/articles/other-datasets.html#migration-flows-1 
 
+#Call migration flows (lowest level is county) - only available up to year 2019
+flows_2018 <- get_flows(
+  geography = "county",
+  year = 2018
+)
+
+flows_2018 <- flows_2018 %>% 
+  filter(variable == "MOVEDNET") %>% 
+  arrange(estimate)
+
+#Group all of the net movement by county (must get rid of NAs from out of the country)
+net_mig_2018 <- flows_2018 %>% 
+  filter(!is.na(GEOID2)) %>% 
+  group_by(GEOID1) %>%
+  mutate(net = sum(estimate))%>%
+  distinct(GEOID1, .keep_all= TRUE) %>%
+  select(-GEOID2, -FULL2_NAME, -estimate, -moe, -variable)
+
+net_mig_2018$COUNTYNM <- word(net_mig_2018$FULL1_NAME, 1)
+
+#Convert COA zip code counts for year 2018 to county level
+
+#Read in crosswalk file
+crosswalk <- read_csv("../zip_county_crosswalk.csv") 
+
+#Rename zipcode to match the original data 
+crosswalk <- crosswalk %>% 
+  rename(ZIPCODE = ZIP) %>%
+  mutate(ZIPCODE = as.numeric(ZIPCODE),
+         ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0"))
+
+#Join the crosswalk to the COA zipcode data
+zcta_join2018 <- year_2018 %>%
+  mutate(ZIPCODE = as.numeric(ZIPCODE),
+         ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0")) %>%
+  left_join(crosswalk, by="ZIPCODE") 
+
+county_COA_2018 <- zcta_join2018 %>% 
+  group_by(YYYYMM, COUNTYNM) %>%
+  mutate(NET_ZIP = sum(NET_ZIP),
+         NET_PERM = sum(NET_PERM),
+         NET_TEMP = sum(NET_TEMP),
+         NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
+  relocate(COUNTY, .before = CITY.x) %>% 
+  relocate(COUNTYNM, .before = CITY.x) %>% 
+  select(YYYYMM,COUNTYNM,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL) %>% 
+  distinct(COUNTYNM, .keep_all= TRUE)
+
+
+
+
+##Other things to do with the tidy census mobility data: get information about where people where moving to, create a map)
