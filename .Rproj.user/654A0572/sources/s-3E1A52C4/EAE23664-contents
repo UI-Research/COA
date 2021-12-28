@@ -152,37 +152,51 @@ net_mig_2018 <- flows_2018 %>%
   distinct(GEOID1, .keep_all= TRUE) %>%
   select(-GEOID2, -FULL2_NAME, -estimate, -moe, -variable)
 
-net_mig_2018$COUNTYNM <- word(net_mig_2018$FULL1_NAME, 1)
-
 #Convert COA zip code counts for year 2018 to county level
 
-#Read in crosswalk file
-crosswalk <- read_csv("../zip_county_crosswalk.csv") 
+#Read in crosswalk file, from here: https://www.huduser.gov/portal/datasets/usps_crosswalk.html
+crosswalk <- read_csv("../ZIP_COUNTY_032018.csv") 
 
-#Rename zipcode to match the original data 
+#Rename zip code to match the original data 
 crosswalk <- crosswalk %>% 
-  rename(ZIPCODE = ZIP) %>%
+  rename(ZIPCODE = zip) %>%
   mutate(ZIPCODE = as.numeric(ZIPCODE),
-         ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0"))
+         ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0")) %>% 
+  rename(GEOID1 = county) 
 
-#Join the crosswalk to the COA zipcode data
-zcta_join2018 <- year_2018 %>%
+#Convert the monthly zip flows from USPS COA to yearly county flows
+zip_join2018 <- year_2018 %>%
   mutate(ZIPCODE = as.numeric(ZIPCODE),
          ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0")) %>%
   left_join(crosswalk, by="ZIPCODE") 
 
-county_COA_2018 <- zcta_join2018 %>% 
-  group_by(YYYYMM, COUNTYNM) %>%
+county_COA_2018 <- zip_join2018 %>% 
+  group_by(GEOID1) %>% 
   mutate(NET_ZIP = sum(NET_ZIP),
          NET_PERM = sum(NET_PERM),
          NET_TEMP = sum(NET_TEMP),
          NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
-  relocate(COUNTY, .before = CITY.x) %>% 
-  relocate(COUNTYNM, .before = CITY.x) %>% 
-  select(YYYYMM,COUNTYNM,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL) %>% 
-  distinct(COUNTYNM, .keep_all= TRUE)
+  select(GEOID1,STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL) %>% 
+  distinct(GEOID1, .keep_all= TRUE)
+
+#Join the Census data to the USPS COA data to compare
+comparing_flows <- county_COA_2018 %>% 
+  tidylog::left_join(net_mig_2018, by="GEOID1")%>% 
+  filter(!is.na(net))
+  
+#Calculating difference between census data and USPS COA data
+comparing_flows$difference <- comparing_flows$net - comparing_flows$NET_ZIP
+
+write.csv(comparing_flows, file.path(path, "Census_Validity_Check.csv"))
 
 
+#Calculate correlate, reference: http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
+library("ggpubr")
+ggscatter(comparing_flows, x = "NET_ZIP", y = "net", 
+          add = "reg.line", conf.int = TRUE, 
+          cor.coef = TRUE, cor.method = "pearson",
+          xlab = "USPS COA 2018 net", ylab = "Census Mobility 2018 net")
 
 
+  
 ##Other things to do with the tidy census mobility data: get information about where people where moving to, create a map)

@@ -1,0 +1,32 @@
+{
+    "id": "473197A5",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1640722904984.0,
+    "source_on_save": false,
+    "relative_order": 8,
+    "properties": {
+        "expression": "comparing_flows",
+        "caption": "comparing_flows",
+        "totalObservations": 3213,
+        "displayedObservations": 3213,
+        "variables": 8,
+        "cacheKey": "45140CF0",
+        "object": "comparing_flows",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=comparing_flows&cache_key=45140CF0&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1911931693280,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1640722904984,
+    "read_only": false,
+    "read_only_alternatives": []
+}
