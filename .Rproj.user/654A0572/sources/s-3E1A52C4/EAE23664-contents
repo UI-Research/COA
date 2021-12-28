@@ -189,7 +189,6 @@ comparing_flows$difference <- comparing_flows$net - comparing_flows$NET_COUNTY
 
 write.csv(comparing_flows, file.path(path, "Census_Validity_Check.csv"))
 
-
 #Calculate correlate, reference: http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
 library("ggpubr")
 ggscatter(comparing_flows, x = "NET_COUNTY", y = "net", 
