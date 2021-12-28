@@ -172,11 +172,11 @@ zip_join2018 <- year_2018 %>%
 
 county_COA_2018 <- zip_join2018 %>% 
   group_by(GEOID1) %>% 
-  mutate(NET_ZIP = sum(NET_ZIP),
+  mutate(NET_COUNTY = sum(NET_ZIP),
          NET_PERM = sum(NET_PERM),
          NET_TEMP = sum(NET_TEMP),
          NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
-  select(GEOID1,STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL) %>% 
+  select(GEOID1,STATE,NET_COUNTY, NET_PERM, NET_TEMP, NET_RESIDENTIAL) %>% 
   distinct(GEOID1, .keep_all= TRUE)
 
 #Join the Census data to the USPS COA data to compare
@@ -185,18 +185,17 @@ comparing_flows <- county_COA_2018 %>%
   filter(!is.na(net))
   
 #Calculating difference between census data and USPS COA data
-comparing_flows$difference <- comparing_flows$net - comparing_flows$NET_ZIP
+comparing_flows$difference <- comparing_flows$net - comparing_flows$NET_COUNTY
 
 write.csv(comparing_flows, file.path(path, "Census_Validity_Check.csv"))
 
 
 #Calculate correlate, reference: http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r
 library("ggpubr")
-ggscatter(comparing_flows, x = "NET_ZIP", y = "net", 
+ggscatter(comparing_flows, x = "NET_COUNTY", y = "net", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "USPS COA 2018 net", ylab = "Census Mobility 2018 net")
 
 
-  
 ##Other things to do with the tidy census mobility data: get information about where people where moving to, create a map)
