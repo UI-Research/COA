@@ -1,0 +1,33 @@
+{
+    "id": "A8B7B692",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1641573944005.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "expression": "zip_cbsa",
+        "caption": "zip_cbsa",
+        "totalObservations": 47423,
+        "displayedObservations": 47423,
+        "variables": 6,
+        "cacheKey": "5BDB604D",
+        "object": "zip_cbsa",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=zip_cbsa&cache_key=5BDB604D&max_cols=50",
+        "preview": 0,
+        "source_window_id": "wrqw8v8lb3094"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1641573267,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1641573944005,
+    "read_only": false,
+    "read_only_alternatives": []
+}
