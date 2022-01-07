@@ -24,33 +24,34 @@ year_2020 <- read_csv("../y2020.csv")
 year_2021 <- read_csv("../y2021.csv")
 
 #Create net variables
-year_2018$NET_ZIP <-year_2018$TOTAL_TO_ZIP - year_2018$TOTAL_FROM_ZIP 
-year_2018$NET_BUSINESS <- year_2018$TOTAL_BUSINESS_1 - year_2018$TOTAL_BUSINESS 
 year_2018$NET_FAMILY <- year_2018$TOTAL_FAMILY_1 - year_2018$TOTAL_FAMILY 
 year_2018$NET_INDIVIDUAL <- year_2018$TOTAL_INDIVIDUAL_1 - year_2018$TOTAL_INDIVIDUAL
 year_2018$NET_PERM <- year_2018$TOTAL_PERM_1 - year_2018$TOTAL_PERM 
-year_2018$NET_TEMP <- year_2018$TOTAL_TEMP_1 - year_2018$TOTAL_TEMP
 
-year_2019$NET_ZIP <-year_2019$TOTAL_TO_ZIP - year_2019$TOTAL_FROM_ZIP 
-year_2019$NET_BUSINESS <- year_2019$TOTAL_BUSINESS_1 - year_2019$TOTAL_BUSINESS 
 year_2019$NET_FAMILY <- year_2019$TOTAL_FAMILY_1 - year_2019$TOTAL_FAMILY 
 year_2019$NET_INDIVIDUAL <- year_2019$TOTAL_INDIVIDUAL_1 - year_2019$TOTAL_INDIVIDUAL
 year_2019$NET_PERM <- year_2019$TOTAL_PERM_1 - year_2019$TOTAL_PERM 
-year_2019$NET_TEMP <- year_2019$TOTAL_TEMP_1 - year_2019$TOTAL_TEMP
 
-year_2020$NET_ZIP <-year_2020$TOTAL_TO_ZIP - year_2020$TOTAL_FROM_ZIP 
-year_2020$NET_BUSINESS <- year_2020$TOTAL_BUSINESS_1 - year_2020$TOTAL_BUSINESS 
 year_2020$NET_FAMILY <- year_2020$TOTAL_FAMILY_1 - year_2020$TOTAL_FAMILY 
 year_2020$NET_INDIVIDUAL <- year_2020$TOTAL_INDIVIDUAL_1 - year_2020$TOTAL_INDIVIDUAL
 year_2020$NET_PERM <- year_2020$TOTAL_PERM_1 - year_2020$TOTAL_PERM 
-year_2020$NET_TEMP <- year_2020$TOTAL_TEMP_1 - year_2020$TOTAL_TEMP
 
-year_2021$NET_ZIP <-year_2021$TOTAL_TO_ZIP - year_2021$TOTAL_FROM_ZIP 
-year_2021$NET_BUSINESS <- year_2021$TOTAL_BUSINESS_1 - year_2021$TOTAL_BUSINESS 
 year_2021$NET_FAMILY <- year_2021$TOTAL_FAMILY_1 - year_2021$TOTAL_FAMILY 
 year_2021$NET_INDIVIDUAL <- year_2021$TOTAL_INDIVIDUAL_1 - year_2021$TOTAL_INDIVIDUAL
 year_2021$NET_PERM <- year_2021$TOTAL_PERM_1 - year_2021$TOTAL_PERM 
-year_2021$NET_TEMP <- year_2021$TOTAL_TEMP_1 - year_2021$TOTAL_TEMP
+
+#Create to residential to and from counts
+year_2018$TOTAL_RESIDENTIAL <- year_2018$TOTAL_FAMILY + year_2018$TOTAL_INDIVIDUAL
+year_2018$TOTAL_RESIDENTIAL_1 <- year_2018$TOTAL_FAMILY_1 + year_2018$TOTAL_INDIVIDUAL_1
+
+year_2019$TOTAL_RESIDENTIAL <- year_2019$TOTAL_FAMILY + year_2019$TOTAL_INDIVIDUAL
+year_2019$TOTAL_RESIDENTIAL_1 <- year_2019$TOTAL_FAMILY_1 + year_2019$TOTAL_INDIVIDUAL_1
+
+year_2020$TOTAL_RESIDENTIAL <- year_2020$TOTAL_FAMILY + year_2020$TOTAL_INDIVIDUAL
+year_2020$TOTAL_RESIDENTIAL_1 <- year_2020$TOTAL_FAMILY_1 + year_2020$TOTAL_INDIVIDUAL_1
+
+year_2021$TOTAL_RESIDENTIAL <- year_2021$TOTAL_FAMILY + year_2021$TOTAL_INDIVIDUAL
+year_2021$TOTAL_RESIDENTIAL_1 <- year_2021$TOTAL_FAMILY_1 + year_2021$TOTAL_INDIVIDUAL_1
 
 #Create net residential variables
 year_2018$NET_RESIDENTIAL <- year_2018$NET_FAMILY + year_2018$NET_INDIVIDUAL
@@ -59,17 +60,34 @@ year_2020$NET_RESIDENTIAL <- year_2020$NET_FAMILY + year_2020$NET_INDIVIDUAL
 year_2021$NET_RESIDENTIAL <- year_2021$NET_FAMILY + year_2021$NET_INDIVIDUAL
 
 #Only keep variables of interest (net_zip, net_perm, net_temp, net_residential)
+#Need to rename the to and from variables 
 year_2018 <- year_2018 %>%
-  select(YYYYMM, ZIPCODE, CITY, STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL)
+  select(YYYYMM, ZIPCODE, CITY, STATE, TOTAL_PERM, TOTAL_PERM_1, NET_PERM, TOTAL_RESIDENTIAL, TOTAL_RESIDENTIAL_1, NET_RESIDENTIAL) %>% 
+  rename(FROM_PERM = TOTAL_PERM) %>% 
+  rename(TO_PERM = TOTAL_PERM_1) %>% 
+  rename(FROM_RESIDENTIAL = TOTAL_RESIDENTIAL) %>% 
+  rename(TO_RESIDENTIAL = TOTAL_RESIDENTIAL_1)
 
 year_2019 <- year_2019 %>%
-  select(YYYYMM, ZIPCODE, CITY, STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL)
+  select(YYYYMM, ZIPCODE, CITY, STATE, TOTAL_PERM, TOTAL_PERM_1, NET_PERM, TOTAL_RESIDENTIAL, TOTAL_RESIDENTIAL_1, NET_RESIDENTIAL) %>% 
+  rename(FROM_PERM = TOTAL_PERM) %>% 
+  rename(TO_PERM = TOTAL_PERM_1) %>% 
+  rename(FROM_RESIDENTIAL = TOTAL_RESIDENTIAL) %>% 
+  rename(TO_RESIDENTIAL = TOTAL_RESIDENTIAL_1)
 
 year_2020 <- year_2020 %>%
-  select(YYYYMM, ZIPCODE, CITY, STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL)
+  select(YYYYMM, ZIPCODE, CITY, STATE, TOTAL_PERM, TOTAL_PERM_1, NET_PERM, TOTAL_RESIDENTIAL, TOTAL_RESIDENTIAL_1, NET_RESIDENTIAL) %>% 
+  rename(FROM_PERM = TOTAL_PERM) %>% 
+  rename(TO_PERM = TOTAL_PERM_1) %>% 
+  rename(FROM_RESIDENTIAL = TOTAL_RESIDENTIAL) %>% 
+  rename(TO_RESIDENTIAL = TOTAL_RESIDENTIAL_1)
 
 year_2021 <- year_2021 %>%
-  select(YYYYMM, ZIPCODE, CITY, STATE,NET_ZIP, NET_PERM, NET_TEMP, NET_RESIDENTIAL)
+  select(YYYYMM, ZIPCODE, CITY, STATE, TOTAL_PERM, TOTAL_PERM_1, NET_PERM, TOTAL_RESIDENTIAL, TOTAL_RESIDENTIAL_1, NET_RESIDENTIAL) %>% 
+  rename(FROM_PERM = TOTAL_PERM) %>% 
+  rename(TO_PERM = TOTAL_PERM_1) %>% 
+  rename(FROM_RESIDENTIAL = TOTAL_RESIDENTIAL) %>% 
+  rename(TO_RESIDENTIAL = TOTAL_RESIDENTIAL_1)
 
 #Pulling out the month - creating a column of quarters for 2018-2021
 quarter_2018 <- year_2018 %>%
@@ -107,10 +125,12 @@ quarter_2021$Year <- "2021"
 #Create summary counts by quarter
 quarter_2018 <- quarter_2018 %>% 
   group_by(Quarter, ZIPCODE) %>%
-  mutate(NET_ZIP = sum(NET_ZIP),
-            NET_PERM = sum(NET_PERM),
-            NET_TEMP = sum(NET_TEMP),
-            NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
+  mutate(TO_PERM = sum(TO_PERM),
+         FROM_PERM = sum(FROM_PERM),
+         NET_PERM = sum(NET_PERM),
+         TO_RESIDENTIAL = sum(TO_RESIDENTIAL),
+         FROM_RESIDENTIAL = sum(FROM_RESIDENTIAL),
+         NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
   mutate(ZIPCODE = as.numeric(ZIPCODE))%>% 
   relocate(Year, Quarter, .before = ZIPCODE) %>% 
   distinct(ZIPCODE, .keep_all = TRUE) %>% 
@@ -118,9 +138,11 @@ quarter_2018 <- quarter_2018 %>%
 
 quarter_2019 <- quarter_2019 %>% 
   group_by(Quarter, ZIPCODE) %>%
-  mutate(NET_ZIP = sum(NET_ZIP),
+  mutate(TO_PERM = sum(TO_PERM),
+         FROM_PERM = sum(FROM_PERM),
          NET_PERM = sum(NET_PERM),
-         NET_TEMP = sum(NET_TEMP),
+         TO_RESIDENTIAL = sum(TO_RESIDENTIAL),
+         FROM_RESIDENTIAL = sum(FROM_RESIDENTIAL),
          NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
   mutate(ZIPCODE = as.numeric(ZIPCODE))%>% 
   relocate(Year, Quarter, .before = ZIPCODE) %>% 
@@ -129,9 +151,11 @@ quarter_2019 <- quarter_2019 %>%
 
 quarter_2020 <- quarter_2020 %>% 
   group_by(Quarter, ZIPCODE) %>%
-  mutate(NET_ZIP = sum(NET_ZIP),
+  mutate(TO_PERM = sum(TO_PERM),
+         FROM_PERM = sum(FROM_PERM),
          NET_PERM = sum(NET_PERM),
-         NET_TEMP = sum(NET_TEMP),
+         TO_RESIDENTIAL = sum(TO_RESIDENTIAL),
+         FROM_RESIDENTIAL = sum(FROM_RESIDENTIAL),
          NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
   mutate(ZIPCODE = as.numeric(ZIPCODE))%>% 
   relocate(Year, Quarter, .before = ZIPCODE) %>% 
@@ -140,9 +164,11 @@ quarter_2020 <- quarter_2020 %>%
 
 quarter_2021 <- quarter_2021 %>% 
   group_by(Quarter, ZIPCODE) %>%
-  mutate(NET_ZIP = sum(NET_ZIP),
+  mutate(TO_PERM = sum(TO_PERM),
+         FROM_PERM = sum(FROM_PERM),
          NET_PERM = sum(NET_PERM),
-         NET_TEMP = sum(NET_TEMP),
+         TO_RESIDENTIAL = sum(TO_RESIDENTIAL),
+         FROM_RESIDENTIAL = sum(FROM_RESIDENTIAL),
          NET_RESIDENTIAL = sum(NET_RESIDENTIAL)) %>% 
   mutate(ZIPCODE = as.numeric(ZIPCODE))%>% 
   relocate(Year, Quarter, .before = ZIPCODE) %>% 
@@ -154,15 +180,11 @@ list <- list(quarter_2018,quarter_2019,quarter_2020,quarter_2021)
 do.call("rbind", list)
 COA_quarterly_zip <- do.call("rbind", lapply(list, as.data.frame)) 
 
-#Adjust type to be able to transpose
+#Pad key numbers to standardize
 COA_quarterly_zip <- COA_quarterly_zip  %>%
-  mutate(NET_ZIP = as.numeric(NET_ZIP),
-         NET_PERM = as.numeric(NET_PERM),
-         NET_TEMP = as.numeric(NET_TEMP),
-         NET_RESIDENTIAL = as.numeric(NET_RESIDENTIAL), 
-         #This is the zipcode padding to make standardize zipcode format so pivot_wider works
+  mutate(#This is the zipcode padding to make standardize zipcode format so pivot_wider works
          ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0"),
-         Quarter = str_pad(Quarter, 2, side = c("left"), pad = "0"))
+         Quarter = str_pad(Quarter, 2, side = c("left"), pad = "Q"))
 
 #Create new variable joining year and quarter
 COA_quarterly_zip$YYYYQQ <- paste(COA_quarterly_zip$Year,COA_quarterly_zip$Quarter, sep= "")
@@ -172,32 +194,64 @@ COA_quarterly_zip <- COA_quarterly_zip  %>%
 
 write.csv(COA_quarterly_zip, file.path(path, "check.csv"))
 
-#Transposing for each variable and merging again
-NET_ZIP <- COA_quarterly_zip %>%
-  select(ZIPCODE, CITY, STATE, YYYYQQ, NET_ZIP) %>% 
-  pivot_wider(names_from = YYYYQQ, values_from = NET_ZIP, names_prefix = "NET_ZIP_")
+#Transposing for each variable
+FROM_PERM <- COA_quarterly_zip %>%
+  select(ZIPCODE, CITY, STATE, YYYYQQ, FROM_PERM) %>% 
+  pivot_wider(names_from = YYYYQQ, values_from = FROM_PERM, names_prefix = "FROM_PERM_")
+
+TO_PERM <- COA_quarterly_zip %>%
+  select(ZIPCODE, CITY, STATE, YYYYQQ, TO_PERM) %>% 
+  pivot_wider(names_from = YYYYQQ, values_from = TO_PERM, names_prefix = "TO_PERM_")
 
 NET_PERM <- COA_quarterly_zip %>%
   select(ZIPCODE, CITY, STATE, YYYYQQ, NET_PERM) %>%
   pivot_wider(names_from = YYYYQQ, values_from = NET_PERM, names_prefix = "NET_PERM_") 
 
-NET_TEMP <- COA_quarterly_zip %>%
-  select(ZIPCODE,CITY, STATE, YYYYQQ, NET_TEMP) %>%
-  pivot_wider(names_from = YYYYQQ, values_from = NET_TEMP, names_prefix = "NET_TEMP_") 
+FROM_RES <- COA_quarterly_zip %>%
+  select(ZIPCODE,CITY, STATE,YYYYQQ, FROM_RESIDENTIAL) %>%
+  pivot_wider(names_from = YYYYQQ, values_from = FROM_RESIDENTIAL, names_prefix = "FROM_RES_")
+
+TO_RES <- COA_quarterly_zip %>%
+  select(ZIPCODE,CITY, STATE,YYYYQQ, TO_RESIDENTIAL) %>%
+  pivot_wider(names_from = YYYYQQ, values_from = TO_RESIDENTIAL, names_prefix = "TO_RES_")
 
 NET_RES <- COA_quarterly_zip %>%
   select(ZIPCODE,CITY, STATE,YYYYQQ, NET_RESIDENTIAL) %>%
   pivot_wider(names_from = YYYYQQ, values_from = NET_RESIDENTIAL, names_prefix = "NET_RES_")
 
 #Merging the short data sets to create one data file
-COA_quarterly <- NET_ZIP %>% 
+open_data_file <- FROM_PERM %>% 
+  full_join(TO_PERM, by = "ZIPCODE")%>%
   full_join(NET_PERM, by = "ZIPCODE")%>% 
-  full_join(NET_TEMP, by = "ZIPCODE")%>% 
+  full_join(FROM_RES, by = "ZIPCODE")%>% 
+  full_join(TO_RES, by = "ZIPCODE")%>% 
   full_join(NET_RES, by = "ZIPCODE") %>% 
   distinct(ZIPCODE,.keep_all= TRUE) %>% 
-  select(-CITY.y, -STATE.y, -CITY.x.x, -STATE.x.x,-CITY.y.y, -STATE.y.y,) %>% 
+  select(-CITY.y, -STATE.y, -CITY.x.x, -STATE.x.x,-CITY.y.y, -STATE.y.y) %>% 
   rename(CITY = CITY.x) %>%
   rename(STATE = STATE.x)
+
+#Use the HUD crosswalks to get FIPS codes
+zip_county <- read.csv("../ZIP_COUNTY_092020.csv", check.names = FALSE, fileEncoding = "UTF-8-BOM") 
+zip_cbsa <- read.csv("../ZIP_CBSA_092020.csv", check.names = FALSE, fileEncoding = "UTF-8-BOM") 
+
+zip_county <- zip_county %>% 
+  rename(ZIPCODE = ZIP) %>% 
+  mutate(ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0")) %>% 
+  select(ZIPCODE,COUNTY)
+
+zip_cbsa <- zip_cbsa %>% 
+  rename(ZIPCODE = ZIP) %>% 
+  mutate(ZIPCODE = str_pad(ZIPCODE, 5, side = c("left"), pad = "0")) %>% 
+  select(ZIPCODE,CBSA)
+
+updated_file <- open_data_file %>% 
+  full_join(zip_county, by = "ZIPCODE") %>% 
+  full_join(zip_cbsa, by = "ZIPCODE") %>% 
+  relocate(COUNTY, .before = CITY) %>% 
+  relocate(CBSA, .before = CITY) %>% 
+  rename(CITYNM = CITY) %>% 
+  rename(STATENM = STATE)
 
 ############################################################################
 #Merging in the USPS vacancy data 
@@ -283,7 +337,7 @@ total_addresses_quarters <- do.call("rbind", lapply(list4, as.data.frame))
 
 #Create new variable joining year and quarter
 total_addresses_quarters <- total_addresses_quarters  %>%
-  mutate(Quarter = str_pad(Quarter, 2, side = c("left"), pad = "0"))
+  mutate(Quarter = str_pad(Quarter, 2, side = c("left"), pad = "Q"))
 
 total_addresses_quarters$YYYYQQ <- paste(total_addresses_quarters$Year,total_addresses_quarters$Quarter, sep= "")
 total_addresses_quarters <- total_addresses_quarters  %>%
@@ -321,37 +375,36 @@ tract_join_quarters <- tract_join_quarters %>%
   relocate(Year, .before = ams_res)%>%
   relocate(Quarter, .before = ams_res)
 
-#Create a single number for the total residence and total addresses in a zipcode
+#Create numbers for the total residence and total addresses in a zipcode
 addresses_in_zip <- tract_join_quarters %>%
-  filter(Quarter == "01") %>%
   ungroup() %>%
-  select(-YYYYQQ, -Quarter, -USPS_ZIP_PREF_CITY, -USPS_ZIP_PREF_STATE) %>% 
+  select(-Year, -Quarter, -USPS_ZIP_PREF_CITY, -USPS_ZIP_PREF_STATE) %>% 
   distinct()
 
 write.csv(addresses_in_zip, file.path(path, "check.csv"))
 
-#Make variables short - total_res_2018, etc ; total_zip_2018, etc
+#Make variables short - total_res_2018Q1, etc ; total_zip_2018Q1, etc
 res_denom <- addresses_in_zip %>% 
-  select(ZIPCODE, Year, ams_res) %>% 
-  pivot_wider(names_from = Year, values_from =ams_res, names_prefix = "total_res_")
+  select(ZIPCODE, YYYYQQ, ams_res) %>% 
+  pivot_wider(names_from = YYYYQQ, values_from =ams_res, names_prefix = "total_res_")
 
 total_denom <- addresses_in_zip %>% 
-  select(ZIPCODE, Year, ams_total) %>% 
-  pivot_wider(names_from = Year, values_from =ams_total, names_prefix = "total_zip_")
+  select(ZIPCODE, YYYYQQ, ams_total) %>% 
+  pivot_wider(names_from = YYYYQQ, values_from =ams_total, names_prefix = "total_zip_")
 
 #Merge these two new data frames 
 all_denom <- res_denom %>% 
   full_join(total_denom, by = "ZIPCODE")
 
 #Merge with the original data set, adding a total of eight new variables per zipcode
-final <- COA_quarterly %>% 
-  full_join(all_denom, by = "ZIPCODE")
+final <-  updated_file %>% 
+  full_join(all_denom, by = "ZIPCODE") %>% 
+  select(-CITY.x.x.x, -STATE.x.x.x, -CITY.y.y.y, -STATE.y.y.y)
+
+#Added to keep the leading zeroes in the zipcode in the csv export (from: https://stackoverflow.com/questions/28675279/r-write-dataframe-column-to-csv-having-leading-zeroes)
+final$ZIPCODE <- paste0(final$ZIPCODE,"\t")
 
 write.csv(final, file.path(path, "COA_quarters_opendatafile.csv"))
 
-#Consider renaming the columns with a Q1 instead of 01 - make "Q" the joiner of YYYYQQ
-
-#Consider generating a rate again
-
-#Validate with census data
+#As a last step, I manually remove the first column of the csv is a an auto generated column of IDS we don't need, but does not show up in the data frame
 

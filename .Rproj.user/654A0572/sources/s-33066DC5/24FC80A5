@@ -1,21 +1,24 @@
 {
-    "id": "DA5AD119",
+    "id": "24FC80A5",
     "path": "~/GitHub/COA/prog/quarters_open_data_file.R",
     "project_path": "prog/quarters_open_data_file.R",
     "type": "r_source",
-    "hash": "1272959555",
+    "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1641573275097.0,
+    "created": 1641578652712.0,
     "source_on_save": false,
-    "relative_order": 3,
-    "properties": {},
+    "relative_order": 2,
+    "properties": {
+        "cursorPosition": "409,0",
+        "scrollLine": "397"
+    },
     "folds": "",
-    "lastKnownWriteTime": 1640636874,
+    "lastKnownWriteTime": 1641578623,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1640636874,
+    "last_content_update": 1641578623,
     "read_only": false,
     "read_only_alternatives": []
 }
