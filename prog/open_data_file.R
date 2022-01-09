@@ -162,12 +162,13 @@ updated_file <- open_data_file %>%
   relocate(CBSA, .before = CITY) %>% 
   rename(CITYNM = CITY) %>% 
   rename(STATENM = STATE) %>% 
-  distinct(ZIPCODE,.keep_all= TRUE) 
+  distinct(ZIPCODE,.keep_all= TRUE) %>% 
+  select(-CITY.x.x.x, -STATE.x.x.x, -CITY.y.y.y, -STATE.y.y.y)
 
 #Added to keep the leading zeroes in the zipcode in the csv export (from: https://stackoverflow.com/questions/28675279/r-write-dataframe-column-to-csv-having-leading-zeroes)
 updated_file$ZIPCODE <- paste0(updated_file$ZIPCODE,"\t")
 
-write.csv(updated_file, file.path(path, "COA_opendatafile.csv"))
+write.csv(updated_file, file.path(path, "COA_months_opendatafile.csv"))
 
 #As a last step, I manually remove the first column of the csv is a an auto generated column of IDS we don't need, but does not show up in the data frame
 

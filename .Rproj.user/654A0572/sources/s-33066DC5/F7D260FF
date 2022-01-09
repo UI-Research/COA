@@ -3,22 +3,22 @@
     "path": "~/GitHub/COA/prog/open_data_file.R",
     "project_path": "prog/open_data_file.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "3785602318",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1641578650652.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
-        "cursorPosition": "167,0",
-        "scrollLine": "166"
+        "cursorPosition": "175,17",
+        "scrollLine": "181"
     },
     "folds": "",
-    "lastKnownWriteTime": 1641579175,
+    "lastKnownWriteTime": 1641741443,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1641580774055,
+    "last_content_update": 1641741443569,
     "read_only": false,
     "read_only_alternatives": []
 }
